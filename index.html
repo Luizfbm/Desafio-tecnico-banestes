@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAP Banestes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            banestes: { DEFAULT: '#003f7f', light: '#005bb5', dark: '#002855' }
+          }
+        }
+      }
+    }
+  </script>
+  <?!= include('styles'); ?>
+</head>
+
+<body class="bg-gray-50 min-h-screen font-sans">
+
+  <!-- NAVBAR -->
+  <nav class="bg-[#003f7f] text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl font-bold tracking-tight">🏦 SAP</span>
+        <span class="text-sm opacity-75 hidden sm:block">Sistema de Acompanhamento de Processos — Banestes</span>
+      </div>
+      <button id="btnNovoProcesso"
+        class="bg-white text-[#003f7f] font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition">
+        + Novo Processo
+      </button>
+    </div>
+  </nav>
+
+  <!-- FILTROS -->
+  <div class="max-w-7xl mx-auto px-4 py-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 flex flex-wrap gap-3 items-end">
+      <div class="flex-1 min-w-[160px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Buscar cliente / contrato</label>
+        <input id="filtroTexto" type="text" placeholder="Nome, contrato..."
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#003f7f]" />
+      </div>
+      <div class="min-w-[140px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
+        <select id="filtroStatus"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#003f7f]">
+          <option value="">Todos</option>
+          <option>INICIADO</option>
+          <option>ANALISANDO</option>
+          <option>PENDENTE</option>
+          <option>PARALISADO</option>
+          <option>FINALIZADO</option>
+        </select>
+      </div>
+      <div class="min-w-[140px]">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Garantia</label>
+        <select id="filtroGarantia"
+          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#003f7f]">
+          <option value="">Todas</option>
+          <option>NENHUMA</option>
+          <option>CARRO</option>
+          <option>MOTO</option>
+          <option>CASA/APARTAMENTO</option>
+          <option>EQUIPAMENTO</option>
+        </select>
+      </div>
+      <button id="btnFiltrar"
+        class="bg-[#003f7f] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#005bb5] transition">
+        Filtrar
+      </button>
+      <button id="btnLimpar"
+        class="text-gray-500 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition border border-gray-200">
+        Limpar
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS CARDS -->
+  <div class="max-w-7xl mx-auto px-4 pb-4 grid grid-cols-2 sm:grid-cols-4 gap-3" id="statsCards"></div>
+
+  <!-- TABELA -->
+  <div class="max-w-7xl mx-auto px-4 pb-8">
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-700">
+          Processos <span id="contadorProcessos" class="text-gray-400 text-sm font-normal"></span>
+        </h2>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingIndicator" class="p-12 text-center text-gray-400">
+        <div class="inline-block w-6 h-6 border-2 border-[#003f7f] border-t-transparent rounded-full mb-2 spinner">
+        </div>
+        <p class="text-sm">Carregando processos...</p>
+      </div>
+
+      <!-- Tabela -->
+      <div class="overflow-x-auto hidden" id="tabelaWrapper">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+            <tr>
+              <th class="px-4 py-3 text-left">ID</th>
+              <th class="px-4 py-3 text-left">Cliente</th>
+              <th class="px-4 py-3 text-left">Produto</th>
+              <th class="px-4 py-3 text-left">Unidade</th>
+              <th class="px-4 py-3 text-left">Valor</th>
+              <th class="px-4 py-3 text-left">Garantia</th>
+              <th class="px-4 py-3 text-left">Status</th>
+              <th class="px-4 py-3 text-left">Atualizado</th>
+              <th class="px-4 py-3 text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+
+      <!-- Sem resultados -->
+      <div id="semResultados" class="p-8 text-center text-gray-400 hidden">
+        <p class="text-lg">🔍</p>
+        <p>Nenhum processo encontrado.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FORMULÁRIO -->
+  <div id="modalOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <h3 id="modalTitulo" class="text-lg font-semibold text-gray-800">Novo Processo</h3>
+        <button id="btnFecharModal" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+      </div>
+      <form id="formProcesso" class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <input type="hidden" id="campoId" />
+        <div>
+          <label class="label-field">Cliente *</label>
+          <select id="campoCliente" required class="input-field">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div>
+          <label class="label-field">Unidade *</label>
+          <select id="campoUnidade" required class="input-field">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="label-field">Produto *</label>
+          <select id="campoProduto" required class="input-field">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div>
+          <label class="label-field">Nº do Contrato *</label>
+          <input id="campoContrato" type="text" required class="input-field" placeholder="Ex: 0015001209" />
+        </div>
+        <div>
+          <label class="label-field">Valor do Contrato *</label>
+          <input id="campoValor" type="text" required class="input-field" placeholder="Ex: R$ 15.000,00" />
+        </div>
+        <div>
+          <label class="label-field">Garantia *</label>
+          <select id="campoGarantia" required class="input-field">
+            <option value="NENHUMA">Nenhuma</option>
+            <option value="CARRO">Carro</option>
+            <option value="MOTO">Moto</option>
+            <option value="CASA/APARTAMENTO">Casa / Apartamento</option>
+            <option value="EQUIPAMENTO">Equipamento</option>
+          </select>
+        </div>
+        <div>
+          <label class="label-field">Status *</label>
+          <select id="campoAndamento" required class="input-field">
+            <option value="INICIADO">Iniciado</option>
+            <option value="ANALISANDO">Analisando</option>
+            <option value="PENDENTE">Pendente</option>
+            <option value="PARALISADO">Paralisado</option>
+            <option value="FINALIZADO">Finalizado</option>
+          </select>
+        </div>
+
+        <!-- Banner de viabilidade -->
+        <div class="sm:col-span-2">
+          <div id="viabilidadeBanner" class="hidden rounded-lg px-4 py-3 text-sm font-medium"></div>
+        </div>
+
+        <div class="sm:col-span-2 flex gap-3 justify-end pt-2">
+          <button type="button" id="btnCancelarForm"
+            class="px-5 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm transition">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSalvar"
+            class="px-5 py-2 rounded-lg bg-[#003f7f] text-white font-medium text-sm hover:bg-[#005bb5] transition">
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR DELETE -->
+  <div id="modalDelete" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+      <div class="text-5xl mb-3">⚠️</div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Confirmar exclusão</h3>
+      <p class="text-gray-500 text-sm mb-6">Esta ação não pode ser desfeita.</p>
+      <div class="flex gap-3 justify-center">
+        <button id="btnCancelarDelete"
+          class="px-5 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm">
+          Cancelar
+        </button>
+        <button id="btnConfirmarDelete"
+          class="px-5 py-2 rounded-lg bg-red-600 text-white font-medium text-sm hover:bg-red-700">
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-4 right-4 z-[100] hidden">
+    <div id="toastContent" class="px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium min-w-[200px]"></div>
+  </div>
+
+  <?!= include('scripts'); ?>
+</body>
+
+</html>
