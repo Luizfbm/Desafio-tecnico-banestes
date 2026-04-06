@@ -1,5 +1,10 @@
 # 🏦 SAP Banestes — Sistema de Acompanhamento de Processos
 
+> [!IMPORTANT]
+> **Identificação do Autor:** O proprietário deste projeto é **Luiz Filipe** (lfilipe051@gmail.com). 
+> Para fins de conformidade com o processo seletivo, o cadastro e submissão foram realizados através do e-mail **contatoluizfbm@gmail.com**. Ambas as contas são de uso pessoal e pertencem ao mesmo autor.
+
+
 O **SAP Banestes** é uma solução completa de Gestão de Processos Judiciais e Administrativos, desenvolvida como um Web App utilizando **Google Apps Script** e **Google Sheets**. A aplicação oferece uma interface moderna para o monitoramento de contratos, clientes e garantias, com foco em análise de viabilidade financeira.
 
 ## 🌟 Destaques do Projeto
