@@ -1,5 +1,5 @@
 > [!IMPORTANT]  
-> **Nota de Propriedade e Contato:** Este projeto está vinculado à conta **lfilipe051@gmail.com**, porém o cadastro do processo para o desafio técnico foi realizado sob o e-mail **contatoluizfbm@gmail.com**. Ambas as contas pertencem ao autor do projeto.
+> **Nota de Propriedade e Contato:** Este projeto está vinculado à conta **lfilipe051@gmail.com**, porém o cadastro do processo para o desafio técnico foi realizado sob o e-mail **contatoluizfbm@gmail.com**. Ambas as contas pertencem a mim (Luiz Filipe Bungenstab Miranda).
 
 # 🏦 SAP Banestes — Sistema de Acompanhamento de Processos
 
